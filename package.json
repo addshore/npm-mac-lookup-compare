@@ -1,0 +1,16 @@
+{
+  "name": "npm-mac-lookup-compare",
+  "version": "0.1.0",
+  "description": "Compare MAC address vendor lookup results across several npm packages",
+  "main": "src/index.js",
+  "scripts": {
+    "compare": "node src/index.js"
+  },
+  "keywords": ["mac", "oui", "vendor", "lookup", "compare"],
+  "license": "MIT",
+  "dependencies": {
+    "@network-utils/vendor-lookup": "*",
+    "oui": "*",
+    "mac-oui-lookup": "*"
+  }
+}
