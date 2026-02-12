@@ -58,9 +58,9 @@ async function callLookup(mod, mac) {
         try {
           const r = target(mac);
           const val = r instanceof Promise ? await r : r;
-          if (val === null) return '<unknown>';
+          if (val === null) return '';
           const extracted = extractString(val);
-          if (extracted !== null && extracted !== undefined) return extracted;
+          if (extracted !== null && extracted !== undefined) return formatForDisplay(extracted);
         } catch (e) {}
       }
 
@@ -71,9 +71,9 @@ async function callLookup(mod, mac) {
           try {
             const r = target[name](mac);
             const val = r instanceof Promise ? await r : r;
-            if (val === null) return '<unknown>';
+            if (val === null) return '';
             const extracted = extractString(val);
-            if (extracted !== null && extracted !== undefined) return extracted;
+            if (extracted !== null && extracted !== undefined) return formatForDisplay(extracted);
           } catch (e) {}
         }
       }
@@ -83,9 +83,9 @@ async function callLookup(mod, mac) {
         const key = mac.toUpperCase().replace(/[:-]/g,'');
         if (target[key]) {
           const val = target[key];
-          if (val === null) return '<unknown>';
+          if (val === null) return '';
           const extracted = extractString(val);
-          if (extracted !== null && extracted !== undefined) return extracted;
+          if (extracted !== null && extracted !== undefined) return formatForDisplay(extracted);
         }
       } catch (e) {}
     }
@@ -96,17 +96,17 @@ async function callLookup(mod, mac) {
       for (const t of targets) {
         if (!t || typeof t !== 'object') continue;
         for (const f of candidateFields) {
-          if (t[f]) return String(t[f]);
+          if (t[f]) return formatForDisplay(String(t[f]));
         }
       }
       // fallback: return a short module summary
       const keys = Object.keys(mod).slice(0,6);
-      return `{module: ${keys.join(', ')}}`;
+      return formatForDisplay(`(module: ${keys.join(', ')})`);
     }
 
-    return 'no-result';
+    return '(no result)';
   } catch (e) {
-    return `error: ${e.message}`;
+    return formatForDisplay(`(error: ${e.message})`);
   }
 }
 
@@ -128,6 +128,20 @@ function extractString(val) {
   }
   return null;
 
+}
+
+function formatForDisplay(s){
+  if (s == null) return '';
+  let out = String(s).trim();
+  // map some placeholder tokens to friendly parentheses so they render in markdown
+  if (out === '<unknown>') out = '';
+  if (out === '<random MAC>') out = '(random MAC)';
+  if (out === '<private>') out = '(private)';
+  if (out === 'not-installed') out = '(not installed)';
+  if (out === 'no-result') out = '(no result)';
+  // remove stray angle brackets which can be interpreted as HTML in markdown
+  out = out.replace(/</g, '(').replace(/>/g, ')');
+  return out;
 }
 
 async function main() {
